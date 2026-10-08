@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💳 Assinatura Catcher (Signature Catcher)
 
-## Getting Started
+> **Verificador inteligente de assinaturas e gastos recorrentes a partir de extratos bancários.**
 
-First, run the development server:
+O **Assinatura Catcher** é uma aplicação web moderna e stateless desenvolvida para ajudar você a descobrir exatamente quanto gasta por mês em assinaturas (Netflix, Spotify, ChatGPT, Smart Fit, iCloud, etc.). 
 
+Você simplesmente insere seu extrato bancário (OFX, CSV ou texto colado), a pipeline processa as transações, identifica as cobranças recorrentes e apresenta um resumo financeiro com projeção anual, divisão por categoria e opção de exportação.
+
+---
+
+## 🚀 Tecnologias Utilizadas
+
+- **Framework Web:** [Next.js](https://nextjs.org/) (App Router)
+- **Linguagem:** [TypeScript](https://www.typescriptlang.org/) (Frontend e Pipeline)
+- **Estilização:** [Tailwind CSS v4](https://tailwindcss.com/)
+- **Testes Automatizados:** [Vitest](https://vitest.dev/)
+- **Gerenciador de Pacotes:** [Bun](https://bun.sh/) (ou npm / pnpm / yarn)
+
+---
+
+## 📦 Pré-requisitos
+
+Certifique-se de ter instalado em sua máquina:
+- **Bun** (versão 1.3+ recomendada) ou **Node.js** (versão 20+ ou 24+)
+
+Para verificar as versões:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun -v
+# ou
+node -v && npm -v
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Como Iniciar o Projeto Localmente
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Clonar ou navegar até a pasta do projeto
+```bash
+cd D:\projetos\assinatura_catcher\signature-catcher
+```
 
-## Learn More
+### 2. Instalar as dependências
+Se estiver utilizando **Bun**:
+```bash
+bun install
+```
+*(Se preferir npm: `npm install`)*
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Rodar o servidor de desenvolvimento
+```bash
+bun dev
+```
+*(Se preferir npm: `npm run dev`)*
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Abra o seu navegador e acerte em:
+👉 **[http://localhost:3000](http://localhost:3000)**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🧪 Como Rodar os Testes Automatizados
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+A suíte de testes unitários é executada com **Vitest**, garantindo agilidade e validação dos parsers e do algoritmo de classificação.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Executar todos os testes uma vez:
+```bash
+bun test
+# ou via script npm:
+bun run test
+# ou com npm:
+npm test
+```
+
+### Executar os testes em modo contínuo (Watch Mode):
+```bash
+bun run test:watch
+# ou com npm:
+npm run test:watch
+```
+
+---
+
+## 🏗️ Build de Produção
+
+Para validar a compilação e gerar o build otimizado:
+```bash
+bun run build
+# ou
+npm run build
+```
+
+Para iniciar o servidor de produção localmente após o build:
+```bash
+bun run start
+# ou
+npm start
+```
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+signature-catcher/
+├── app/                  # Rotas e páginas do Next.js (App Router)
+│   ├── globals.css       # Estilos globais e Tailwind CSS
+│   ├── layout.tsx        # Layout principal da aplicação
+│   └── page.tsx          # Página principal do fluxo da aplicação
+├── components/           # Componentes modulares da interface
+│   ├── StatementUploader # Upload de arquivos (OFX, CSV) e colagem de texto
+│   ├── ReviewTable       # Tabela interativa para marcar/desmarcar assinaturas
+│   ├── FinancialSummary  # Painel de métricas (total mensal, anual, categorias)
+│   └── MockDataSelector  # Botões para testar com 1 clique (Nubank, Itaú, etc.)
+├── lib/
+│   ├── types/            # Interfaces TypeScript (transações, categorias, resumo)
+│   ├── parsers/          # Parsers dedicados para OFX, CSV e Texto
+│   ├── engine/           # Dicionário de serviços, motor de detecção e cálculos
+│   └── fixtures/         # Extratos bancários simulados para testes rápidos
+├── tests/                # Testes unitários com Vitest
+│   ├── sanity.test.ts    # Teste de fumaça e resolução de path aliases
+│   ├── parsers/          # Testes para validação dos parsers de extrato
+│   └── engine/           # Testes das regras de classificação e cálculo
+├── vitest.config.mts     # Configuração do Vitest
+├── tsconfig.json         # Configurações do compilador TypeScript
+└── package.json          # Scripts e dependências do projeto
+```
+
+---
+
+## 🔒 Privacidade e Segurança
+
+- **100% Client/Local First:** O processamento do extrato bancário acontece localmente na sua máquina.
+- **Zero Persistência Externa:** Nenhum dado financeiro ou transação é salvo em bancos de dados em nuvem ou enviado para serviços terceiros.
