@@ -1,11 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FileUploader } from '@/components/FileUploader';
+import { TemporaryResultsList } from '@/components/TemporaryResultsList';
 import { UploadedFileState } from '@/lib/types/transaction';
+import { parseCSVStatement } from '@/lib/parsers/csv-parser';
+import { detectSubscriptions } from '@/lib/engine/detector';
 
 export default function Home() {
   const [currentFileState, setCurrentFileState] = useState<UploadedFileState | null>(null);
+
+  // Processamento reativo imediato assim que um extrato é aceito
+  const detectionResult = useMemo(() => {
+    if (!currentFileState?.validation.rawContent) return null;
+    const transactions = parseCSVStatement(currentFileState.validation.rawContent);
+    return detectSubscriptions(transactions);
+  }, [currentFileState]);
+
+  const handleReset = () => {
+    setCurrentFileState(null);
+  };
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex flex-col">
@@ -27,7 +41,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-10">
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-8">
         {/* Hero Section */}
         <div className="text-center space-y-3">
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
@@ -40,32 +54,54 @@ export default function Home() {
 
         {/* Pipeline Step Progress */}
         <div className="grid grid-cols-3 gap-2 sm:gap-4 max-w-2xl mx-auto text-xs font-semibold">
-          <div className={`p-3 rounded-xl border text-center transition ${
-            currentFileState 
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400' 
-              : 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-          }`}>
+          <div
+            className={`p-3 rounded-xl border text-center transition ${
+              currentFileState
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
+                : 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+            }`}
+          >
             <span className="block text-sm font-bold">Passo 1</span>
-            Entrada do Arquivo
+            {currentFileState ? '✓ Arquivo Recebido' : 'Entrada do Arquivo'}
           </div>
-          <div className="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-100/60 dark:bg-neutral-900/40 text-neutral-400 dark:text-neutral-500 text-center">
+
+          <div
+            className={`p-3 rounded-xl border text-center transition ${
+              detectionResult
+                ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                : 'border-neutral-200 dark:border-neutral-800 bg-neutral-100/60 dark:bg-neutral-900/40 text-neutral-400 dark:text-neutral-500'
+            }`}
+          >
             <span className="block text-sm font-bold">Passo 2</span>
-            Limpeza & Detecção
+            {detectionResult ? 'Limpeza & Detecção (Ativo)' : 'Limpeza & Detecção'}
           </div>
+
           <div className="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-100/60 dark:bg-neutral-900/40 text-neutral-400 dark:text-neutral-500 text-center">
             <span className="block text-sm font-bold">Passo 3</span>
             Cálculo & Resumo
           </div>
         </div>
 
-        {/* Upload Component */}
-        <section className="bg-white dark:bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-xs">
-          <FileUploader
-            onFileAccepted={(state) => setCurrentFileState(state)}
-            onFileRemoved={() => setCurrentFileState(null)}
-          />
-        </section>
-
+        {/* Seção 1: Upload (Exibida quando não há arquivo ou em modo compacto) */}
+        {!detectionResult ? (
+          <section className="bg-white dark:bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-xs">
+            <FileUploader
+              onFileAccepted={(state) => setCurrentFileState(state)}
+              onFileRemoved={handleReset}
+            />
+          </section>
+        ) : (
+          /* Seção 2: Lista Temporária de Resultados */
+          <section className="space-y-6">
+            <TemporaryResultsList
+              initialSubscriptions={detectionResult.subscriptions}
+              discardedTransactions={detectionResult.discarded}
+              totalAnalyzed={detectionResult.totalAnalyzed}
+              fileName={currentFileState?.validation.fileName || 'Extrato'}
+              onReset={handleReset}
+            />
+          </section>
+        )}
       </main>
 
       {/* Footer */}
