@@ -4,6 +4,24 @@
 
 export type TransactionType = 'DEBIT' | 'CREDIT' | 'OTHER';
 
+export type SupportedFileType = 'csv' | 'ofx' | 'pdf' | 'txt';
+
+export interface FileValidationResult {
+  isValid: boolean;
+  fileType?: SupportedFileType;
+  fileName: string;
+  fileSize: number;
+  fileSizeFormatted: string;
+  errorMessage?: string;
+  rawContent?: string;
+}
+
+export interface UploadedFileState {
+  file: File | { name: string; size: number; content?: string };
+  validation: FileValidationResult;
+  previewLines?: string[];
+}
+
 export type SubscriptionCategory =
   | 'STREAMING_VIDEO'
   | 'STREAMING_AUDIO'
